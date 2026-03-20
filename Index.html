@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Registro · Suaita</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:       #0d1410;
+    --surface:  #141f18;
+    --border:   #1e2e22;
+    --green:    #4ade80;
+    --green-dim:#1a3d25;
+    --amber:    #fbbf24;
+    --red:      #f87171;
+    --text:     #e2f0e6;
+    --muted:    #5a7a62;
+    --mono:     'Space Mono', monospace;
+    --sans:     'Syne', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  /* ─── Header ─── */
+  header {
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 10;
+  }
+  .logo-dot {
+    width: 10px; height: 10px;
+    background: var(--green);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--green);
+  }
+  header h1 { font-size: 13px; font-family: var(--mono); letter-spacing: .08em; color: var(--muted); text-transform: uppercase; }
+  header h1 span { color: var(--green); }
+
+  /* ─── Screens ─── */
+  .screen { display: none; flex-direction: column; flex: 1; padding: 20px; gap: 20px; animation: fadeUp .3s ease; }
+  .screen.active { display: flex; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ─── Screen: Selección ─── */
+  .screen-title {
+    font-size: 24px; font-weight: 800; line-height: 1.2;
+    margin-bottom: 4px;
+  }
+  .screen-sub { font-size: 14px; color: var(--muted); font-family: var(--mono); }
+
+  .type-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    cursor: pointer;
+    transition: border-color .2s, transform .15s;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    user-select: none;
+  }
+  .type-card:active { transform: scale(0.97); }
+  .type-card.selected { border-color: var(--green); background: var(--green-dim); }
+
+  .card-icon { font-size: 32px; line-height: 1; }
+  .card-body h3 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .card-body p  { font-size: 13px; color: var(--muted); font-family: var(--mono); line-height: 1.5; }
+
+  /* ─── Screen: Guía ─── */
+  .guide-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+  }
+
+  .guide-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 16px;
+  }
+
+  .guide-step {
+    margin-bottom: 18px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .guide-step:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+  .step-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 4px;
+    letter-spacing: .1em;
+  }
+  .step-title { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+
+  .step-examples { display: flex; flex-direction: column; gap: 4px; }
+  .example {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--muted);
+    padding: 6px 10px;
+    background: rgba(74,222,128,.06);
+    border-left: 2px solid var(--green-dim);
+    border-radius: 0 6px 6px 0;
+    line-height: 1.4;
+  }
+  .example em { color: var(--text); font-style: normal; }
+
+  .full-example {
+    background: var(--green-dim);
+    border: 1px solid rgba(74,222,128,.25);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-top: 16px;
+  }
+  .full-example .label { font-family: var(--mono); font-size: 10px; color: var(--green); letter-spacing: .1em; margin-bottom: 6px; }
+  .full-example p { font-family: var(--mono); font-size: 12px; color: var(--text); line-height: 1.6; }
+
+  /* ─── Screen: Grabar ─── */
+  .record-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    padding: 32px 0;
+  }
+
+  .mic-btn {
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--surface);
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all .2s;
+    position: relative;
+    outline: none;
+    -webkit-appearance: none;
+  }
+  .mic-btn svg { width: 36px; height: 36px; color: var(--muted); transition: color .2s; }
+  .mic-btn .mic-label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: .08em; transition: color .2s; }
+
+  .mic-btn.recording {
+    border-color: var(--red);
+    background: rgba(248,113,113,.08);
+    animation: pulse-border 1.2s ease-in-out infinite;
+  }
+  .mic-btn.recording svg    { color: var(--red); }
+  .mic-btn.recording .mic-label { color: var(--red); }
+
+  @keyframes pulse-border {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(248,113,113,.3); }
+    50%       { box-shadow: 0 0 0 16px rgba(248,113,113,0); }
+  }
+
+  .record-status {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--muted);
+    text-align: center;
+    min-height: 20px;
+  }
+  .record-status.active { color: var(--red); }
+
+  /* Transcript en tiempo real */
+  .transcript-box {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--text);
+    min-height: 80px;
+    transition: border-color .2s;
+  }
+  .transcript-box.has-text { border-color: rgba(74,222,128,.3); }
+  .transcript-placeholder { color: var(--muted); font-style: italic; }
+
+  /* ─── Screen: Revisión ─── */
+  .field-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .field-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+  .field-row.ok     { border-color: rgba(74,222,128,.25); }
+  .field-row.warn   { border-color: rgba(251,191,36,.25); }
+  .field-row.miss   { border-color: var(--border); opacity: .5; }
+
+  .field-icon { font-size: 16px; margin-top: 1px; flex-shrink: 0; }
+  .field-label { font-family: var(--mono); font-size: 10px; color: var(--muted); letter-spacing: .08em; margin-bottom: 2px; }
+  .field-value { font-size: 14px; font-weight: 700; }
+  .field-value.empty { color: var(--muted); font-weight: 400; font-style: italic; }
+
+  /* ─── Screen: Éxito ─── */
+  .success-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: 20px;
+    text-align: center;
+    padding: 40px 0;
+  }
+  .success-icon { font-size: 64px; animation: pop .4s cubic-bezier(.175,.885,.32,1.275); }
+  @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
+  .success-title { font-size: 26px; font-weight: 800; }
+  .success-sub   { font-family: var(--mono); font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+  /* ─── Botones globales ─── */
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    width: 100%; padding: 16px;
+    border: none; border-radius: 12px;
+    font-family: var(--sans); font-size: 15px; font-weight: 700;
+    cursor: pointer; transition: all .15s;
+    outline: none; -webkit-appearance: none;
+  }
+  .btn:active { transform: scale(0.97); }
+
+  .btn-primary {
+    background: var(--green);
+    color: #0d1410;
+  }
+  .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+
+  .btn-ghost {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn-danger {
+    background: rgba(248,113,113,.12);
+    color: var(--red);
+    border: 1px solid rgba(248,113,113,.2);
+  }
+
+  .btn-row { display: flex; gap: 10px; }
+  .btn-row .btn { flex: 1; }
+
+  /* ─── Misc ─── */
+  .divider { height: 1px; background: var(--border); }
+  .error-banner {
+    background: rgba(248,113,113,.1);
+    border: 1px solid rgba(248,113,113,.3);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--red);
+    display: none;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-dot"></div>
+  <h1>Suaita · <span>Riego</span></h1>
+</header>
+
+<!-- ══════════════════════════════════
+     PANTALLA 1: Selección de tipo
+═══════════════════════════════════ -->
+<div class="screen active" id="s-tipo">
+  <div>
+    <div class="screen-title">¿Qué vas<br>a registrar?</div>
+    <div class="screen-sub" style="margin-top:6px">Elige el tipo de registro</div>
+  </div>
+
+  <div class="type-card" id="card-riego" onclick="seleccionarTipo('riego')">
+    <div class="card-icon">💧</div>
+    <div class="card-body">
+      <h3>Riego del día</h3>
+      <p>pH · CE · Método · Volumen<br>Fertilización · Observaciones</p>
+    </div>
+  </div>
+
+  <div class="type-card" id="card-mant" onclick="seleccionarTipo('mantenimiento')">
+    <div class="card-icon">🔧</div>
+    <div class="card-body">
+      <h3>Mantenimiento semanal</h3>
+      <p>Goteros · Filtros · Purga<br>Tanques · Observaciones</p>
+    </div>
+  </div>
+
+  <button class="btn btn-primary" id="btn-tipo" disabled onclick="irAGuia()">
+    Continuar →
+  </button>
+</div>
+
+<!-- ══════════════════════════════════
+     PANTALLA 2: Guía de voz
+═══════════════════════════════════ -->
+<div class="screen" id="s-guia">
+  <div>
+    <div class="screen-title" id="guia-titulo">Guía de voz</div>
+    <div class="screen-sub">Di esto cuando grabes</div>
+  </div>
+
+  <div class="guide-box" id="guia-contenido"></div>
+
+  <button class="btn btn-primary" onclick="irAGrabar()">
+    🎙️ &nbsp;Listo, voy a grabar
+  </button>
+  <button class="btn btn-ghost" onclick="ir('s-tipo')">← Cambiar tipo</button>
+</div>
+
+<!-- ══════════════════════════════════
+     PANTALLA 3: Grabación
+═══════════════════════════════════ -->
+<div class="screen" id="s-grabar">
+  <div>
+    <div class="screen-title">Graba tu nota</div>
+    <div class="screen-sub" id="grabar-sub">Sigue el guión que te mostramos</div>
+  </div>
+
+  <div class="record-zone">
+    <button class="mic-btn" id="mic-btn" onclick="toggleRecording()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="2" width="6" height="13" rx="3"/>
+        <path d="M5 10a7 7 0 0 0 14 0"/>
+        <line x1="12" y1="19" x2="12" y2="22"/>
+        <line x1="8" y1="22" x2="16" y2="22"/>
+      </svg>
+      <span class="mic-label" id="mic-label">GRABAR</span>
+    </button>
+    <div class="record-status" id="record-status">Toca el micrófono para iniciar</div>
+  </div>
+
+  <div class="transcript-box" id="transcript-box">
+    <span class="transcript-placeholder">Tu voz aparecerá aquí mientras hablas...</span>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="ir('s-guia')">← Guía</button>
+    <button class="btn btn-primary" id="btn-procesar" disabled onclick="procesarTranscript()">
+      Revisar →
+    </button>
+  </div>
+
+  <div class="error-banner" id="error-speech">
+    ⚠ Tu navegador no soporta reconocimiento de voz. Usa Chrome en Android.
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     PANTALLA 4: Revisión
+═══════════════════════════════════ -->
+<div class="screen" id="s-revision">
+  <div>
+    <div class="screen-title">Revisa el<br>registro</div>
+    <div class="screen-sub">Confirma que los datos están bien</div>
+  </div>
+
+  <div class="field-list" id="field-list"></div>
+
+  <div class="error-banner" id="error-submit">❌ Error al guardar. Intenta de nuevo.</div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="ir('s-grabar')">← Volver a grabar</button>
+    <button class="btn btn-primary" id="btn-submit" onclick="enviarDatos()">
+      Guardar ✓
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     PANTALLA 5: Éxito
+═══════════════════════════════════ -->
+<div class="screen" id="s-exito">
+  <div class="success-zone">
+    <div class="success-icon">✅</div>
+    <div class="success-title">¡Registro guardado!</div>
+    <div class="success-sub" id="exito-detalle"></div>
+  </div>
+  <button class="btn btn-primary" onclick="reiniciar()">Nuevo registro</button>
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// Estado global
+// ─────────────────────────────────────────────
+let estado = {
+  tipo:        null,   // "riego" | "mantenimiento"
+  transcript:  "",
+  datos:       {},
+};
+
+let recognition = null;
+let isRecording = false;
+
+// ─────────────────────────────────────────────
+// Navegación
+// ─────────────────────────────────────────────
+function ir(screenId) {
+  document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
+  document.getElementById(screenId).classList.add("active");
+  window.scrollTo(0, 0);
+}
+
+// ─────────────────────────────────────────────
+// Pantalla 1: Selección
+// ─────────────────────────────────────────────
+function seleccionarTipo(tipo) {
+  estado.tipo = tipo;
+  document.getElementById("card-riego").classList.toggle("selected", tipo === "riego");
+  document.getElementById("card-mant").classList.toggle("selected", tipo === "mantenimiento");
+  document.getElementById("btn-tipo").disabled = false;
+}
+
+function irAGuia() {
+  const titulo = estado.tipo === "riego" ? "Guía — Riego del día" : "Guía — Mantenimiento";
+  document.getElementById("guia-titulo").textContent = titulo;
+  document.getElementById("guia-contenido").innerHTML =
+    estado.tipo === "riego" ? guiaRiego() : guiaMant();
+  ir("s-guia");
+}
+
+// ─────────────────────────────────────────────
+// Guiones
+// ─────────────────────────────────────────────
+function guiaRiego() {
+  const pasos = [
+    { num: "01", title: "¿Quién eres?",
+      ex: ['"Soy Oscar"', '"Soy Josué"'] },
+    { num: "02", title: "Módulo y etapa",
+      ex: ['"Módulo 2"', '"Módulo A, etapa floración"', '"Módulo 3, vegetativo"'] },
+    { num: "03", title: "Agua (antes de fertilizar)",
+      ex: ['"pH agua 6.8"', '"CE entrada 0.3"', '"pH agua 7.0, CE entrada 0.25"'] },
+    { num: "04", title: "Riego",
+      ex: ['"por goteo, 20 minutos"', '"por aspersión, 50 litros"', '"riego manual"'] },
+    { num: "05", title: "Fertilización (si aplica)",
+      ex: ['"solución A, pH final 6.2, CE final 1.8, 40 litros por fertirrigación"', '"ninguna"'] },
+    { num: "06", title: "Novedades",
+      ex: ['"sin novedades"', '"planta con amarillamiento en módulo 2"'] },
+  ];
+  return renderGuia(pasos, '"Soy Oscar, módulo 2, etapa floración. pH agua 6.8, CE entrada 0.25. Riego por goteo 25 minutos. Solución A, pH final 6.2, CE final 1.9, 40 litros por fertirrigación. Sin novedades."');
+}
+
+function guiaMant() {
+  const pasos = [
+    { num: "01", title: "¿Quién eres?",
+      ex: ['"Soy Josué"', '"Soy Oscar"'] },
+    { num: "02", title: "Goteros / Aspersores",
+      ex: ['"Goteros revisados, todo bien"', '"Goteros con novedad, emisor del módulo 4 tapado"'] },
+    { num: "03", title: "Limpieza de filtros",
+      ex: ['"Filtros limpios"', '"Filtros sucios, con sedimento"', '"Filtros no realizados"'] },
+    { num: "04", title: "Purga de líneas",
+      ex: ['"Purga hecha"', '"Purga no aplica esta semana"'] },
+    { num: "05", title: "Estado de tanques",
+      ex: ['"Tanques en buen estado"', '"Tanque B con sedimento"'] },
+    { num: "06", title: "Novedades",
+      ex: ['"Sin novedades"', '"La bomba principal hace ruido raro"'] },
+  ];
+  return renderGuia(pasos, '"Soy Josué. Goteros revisados, todo bien. Filtros limpios. Purga hecha. Tanques en buen estado. Sin novedades."');
+}
+
+function renderGuia(pasos, ejemplo) {
+  const stepsHtml = pasos.map(p => `
+    <div class="guide-step">
+      <div class="step-num">PASO ${p.num}</div>
+      <div class="step-title">${p.title}</div>
+      <div class="step-examples">
+        ${p.ex.map(e => `<div class="example"><em>${e}</em></div>`).join("")}
+      </div>
+    </div>
+  `).join("");
+
+  return `
+    <div class="guide-label">Sigue este orden al hablar</div>
+    ${stepsHtml}
+    <div class="full-example">
+      <div class="label">💬 EJEMPLO COMPLETO</div>
+      <p>${ejemplo}</p>
+    </div>
+  `;
+}
+
+// ─────────────────────────────────────────────
+// Pantalla 3: Grabación — Web Speech API
+// ─────────────────────────────────────────────
+function irAGrabar() {
+  estado.transcript = "";
+  document.getElementById("transcript-box").innerHTML =
+    '<span class="transcript-placeholder">Tu voz aparecerá aquí mientras hablas...</span>';
+  document.getElementById("btn-procesar").disabled = true;
+  document.getElementById("record-status").textContent = "Toca el micrófono para iniciar";
+  document.getElementById("record-status").classList.remove("active");
+  document.getElementById("mic-btn").classList.remove("recording");
+  document.getElementById("mic-label").textContent = "GRABAR";
+
+  const sub = estado.tipo === "riego" ? "Registro diario de riego" : "Mantenimiento semanal";
+  document.getElementById("grabar-sub").textContent = sub;
+
+  if (!("webkitSpeechRecognition" in window) && !("SpeechRecognition" in window)) {
+    document.getElementById("error-speech").style.display = "block";
+  }
+
+  ir("s-grabar");
+}
+
+function toggleRecording() {
+  if (isRecording) {
+    stopRecording();
+  } else {
+    startRecording();
+  }
+}
+
+function startRecording() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) {
+    document.getElementById("error-speech").style.display = "block";
+    return;
+  }
+
+  recognition = new SpeechRecognition();
+  recognition.lang = "es-CO";
+  recognition.continuous = true;
+  recognition.interimResults = true;
+
+  let finalTranscript = "";
+
+  recognition.onstart = () => {
+    isRecording = true;
+    document.getElementById("mic-btn").classList.add("recording");
+    document.getElementById("mic-label").textContent = "DETENER";
+    document.getElementById("record-status").textContent = "Grabando... habla ahora";
+    document.getElementById("record-status").classList.add("active");
+  };
+
+  recognition.onresult = (event) => {
+    let interim = "";
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const t = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        finalTranscript += t + " ";
+      } else {
+        interim += t;
+      }
+    }
+
+    const box = document.getElementById("transcript-box");
+    box.innerHTML = finalTranscript
+      ? `<span style="color:var(--text)">${finalTranscript}</span><span style="color:var(--muted)">${interim}</span>`
+      : `<span style="color:var(--muted)">${interim}</span>`;
+    box.classList.add("has-text");
+
+    estado.transcript = (finalTranscript + interim).trim();
+    document.getElementById("btn-procesar").disabled = !estado.transcript;
+  };
+
+  recognition.onerror = (e) => {
+    console.error("Speech error:", e.error);
+    stopRecording();
+  };
+
+  recognition.onend = () => {
+    isRecording = false;
+    document.getElementById("mic-btn").classList.remove("recording");
+    document.getElementById("mic-label").textContent = "GRABAR";
+    document.getElementById("record-status").textContent = "Grabación finalizada";
+    document.getElementById("record-status").classList.remove("active");
+  };
+
+  recognition.start();
+}
+
+function stopRecording() {
+  if (recognition) {
+    recognition.stop();
+    recognition = null;
+  }
+  isRecording = false;
+}
+
+// ─────────────────────────────────────────────
+// Parser de transcripción — sin APIs externas
+// ─────────────────────────────────────────────
+function parseRiego(txt) {
+  const t = txt.toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "") // quitar tildes para el match
+    .replace(/,/g, " ").replace(/\./g, " ");
+
+  const num = (regex) => {
+    const m = t.match(regex);
+    return m ? parseFloat(m[1].replace(",", ".")) : null;
+  };
+
+  const nombre = (s) => s.match(/soy\s+(oscar|josue|josué|otro|[\w]+)/i)?.[1] || null;
+  const resp = nombre(t);
+
+  const modMatch = txt.match(/modulo\s+([\w\d]+)/i) || txt.match(/módulo\s+([\w\d]+)/i);
+  const mod = modMatch ? modMatch[1] : null;
+
+  const etapa = t.includes("floraci") ? "floración"
+              : t.includes("vegetat") ? "vegetativo"
+              : null;
+
+  const ph_agua    = num(/ph\s+(?:del\s+)?agua\s+([\d,\.]+)/);
+  const ce_entrada = num(/c[ae]\s+entrada\s+([\d,\.]+)/);
+
+  const metodo = t.includes("goteo") ? "goteo"
+               : t.includes("aspersion") || t.includes("aspersor") ? "aspersión"
+               : t.includes("manual") ? "manual"
+               : null;
+
+  // Volumen o tiempo
+  const minMatch = txt.match(/(\d+)\s*minutos?/i);
+  const litMatch = txt.match(/(\d+)\s*litros?\s+(?:de\s+riego|por\s+riego)?(?!\s+por\s+fertirrigacion)/i);
+  const volTiempo = minMatch ? minMatch[1] + " min"
+                  : litMatch ? litMatch[1] + " L"
+                  : null;
+
+  // Fertilización
+  const solMatch = txt.match(/soluci[oó]n\s+([\w\d]+)/i);
+  const solucion = t.includes("ninguna") || t.includes("sin fertili") ? "ninguna"
+                 : solMatch ? "Solución " + solMatch[1].toUpperCase()
+                 : null;
+
+  const ph_final    = num(/ph\s+final\s+([\d,\.]+)/);
+  const ce_final    = num(/c[ae]\s+final\s+([\d,\.]+)/);
+
+  // Volumen solución: número antes de "litros" + contexto fertirrigacion/foliar
+  const volSolMatch = txt.match(/(\d+)\s*litros?\s+(?:por\s+(?:fertirreg|fertirrig|foliar|aspersion|aplicaci))/i)
+                   || txt.match(/(\d+)\s*litros?\s+(?:de\s+(?:soluci|fertili))/i);
+  const volSol = volSolMatch ? parseFloat(volSolMatch[1]) : null;
+
+  const metApl = t.includes("fertirrig") ? "fertirrigación"
+               : t.includes("foliar") ? "foliar"
+               : t.includes("aspersion") && solucion && solucion !== "ninguna" ? "aspersión"
+               : null;
+
+  const obs = t.includes("sin novedad") || t.includes("todo bien") || t.includes("todo normal")
+            ? "Sin novedades"
+            : extraerObservacion(txt, ["modulo","etapa","ph","ce entrada","ce final","goteo","aspers","solucion","fertirrig","minutos","litros","riego"]);
+
+  return {
+    responsable: resp ? cap(resp) : null,
+    otro_nombre: null,
+    modulo: mod,
+    etapa,
+    ph_agua,
+    ce_entrada,
+    metodo_riego: metodo,
+    volumen_tiempo: volTiempo,
+    solucion,
+    ph_final,
+    ce_final,
+    volumen_sol: volSol,
+    metodo_aplicacion: metApl,
+    observaciones: obs,
+  };
+}
+
+function parseMant(txt) {
+  const t = txt.toLowerCase()
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/,/g, " ").replace(/\./g, " ");
+
+  const status = (palabras) => {
+    if (palabras.some(p => t.includes(p))) {
+      if (t.includes("novedad") || t.includes("problema") || t.includes("tapado") ||
+          t.includes("roto") || t.includes("sucio") || t.includes("sedimento") ||
+          t.includes("ruido") || t.includes("danad") || t.includes("mal")) return "⚠";
+      if (t.includes("no hecho") || t.includes("no realiz") || t.includes("no se hizo") ||
+          t.includes("pendiente") || t.includes("sin hacer")) return "✗";
+      if (t.includes("no aplic") || t.includes("n/a")) return "N/A";
+      return "✅";
+    }
+    return null;
+  };
+
+  const resp = txt.match(/soy\s+(oscar|josue|josué|otro|[\w]+)/i)?.[1];
+
+  const goteros = status(["gotero","aspersor","emisor"]);
+  const filtros  = status(["filtro","filtros"]);
+  const purga    = status(["purga"]);
+  const tanques  = status(["tanque","tanques"]);
+
+  const obs = t.includes("sin novedad") || t.includes("todo bien") ? "Sin novedades"
+            : extraerObservacion(txt, ["gotero","filtro","purga","tanque","soy","soi"]);
+
+  return {
+    responsable: resp ? cap(resp) : null,
+    otro_nombre: null,
+    goteros,
+    filtros,
+    purga,
+    tanques,
+    observaciones: obs,
+  };
+}
+
+function extraerObservacion(txt, excluir) {
+  const oraciones = txt.split(/[,.]/);
+  const relevantes = oraciones.filter(o => {
+    const ol = o.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+    return !excluir.some(ex => ol.includes(ex)) && ol.trim().length > 5;
+  });
+  return relevantes.length > 0 ? relevantes.join(". ").trim() : "Sin novedades";
+}
+
+function cap(s) {
+  if (!s) return s;
+  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+}
+
+// ─────────────────────────────────────────────
+// Pantalla 4: Revisión
+// ─────────────────────────────────────────────
+function procesarTranscript() {
+  stopRecording();
+  estado.datos = estado.tipo === "riego"
+    ? parseRiego(estado.transcript)
+    : parseMant(estado.transcript);
+
+  renderRevision();
+  ir("s-revision");
+}
+
+function renderRevision() {
+  const d = estado.datos;
+  const n = (v) => v != null ? v : null;
+  let campos = [];
+
+  if (estado.tipo === "riego") {
+    campos = [
+      { icon: "👤", label: "RESPONSABLE",    val: n(d.responsable) },
+      { icon: "🌿", label: "MÓDULO",          val: n(d.modulo) },
+      { icon: "🌱", label: "ETAPA",           val: n(d.etapa) },
+      { icon: "💧", label: "pH AGUA",         val: n(d.ph_agua) },
+      { icon: "⚡", label: "CE ENTRADA",      val: n(d.ce_entrada) != null ? n(d.ce_entrada) + " mS/cm" : null },
+      { icon: "🚿", label: "MÉTODO RIEGO",    val: n(d.metodo_riego) },
+      { icon: "⏱",  label: "VOLUMEN / TIEMPO",val: n(d.volumen_tiempo) },
+      { icon: "🧪", label: "SOLUCIÓN",        val: n(d.solucion) },
+      { icon: "💧", label: "pH FINAL",        val: n(d.ph_final) },
+      { icon: "⚡", label: "CE FINAL",        val: n(d.ce_final) != null ? n(d.ce_final) + " mS/cm" : null },
+      { icon: "🌊", label: "VOLUMEN SOL. (L)",val: n(d.volumen_sol) },
+      { icon: "🔄", label: "MÉTODO APLICACIÓN",val: n(d.metodo_aplicacion) },
+      { icon: "📝", label: "OBSERVACIONES",   val: n(d.observaciones) },
+    ];
+  } else {
+    campos = [
+      { icon: "👤", label: "RESPONSABLE",         val: n(d.responsable) },
+      { icon: "🔧", label: "GOTEROS / ASPERSORES", val: n(d.goteros) },
+      { icon: "🔧", label: "LIMPIEZA FILTROS",     val: n(d.filtros) },
+      { icon: "🔧", label: "PURGA LÍNEAS",         val: n(d.purga) },
+      { icon: "🔧", label: "ESTADO TANQUES",       val: n(d.tanques) },
+      { icon: "📝", label: "OBSERVACIONES",        val: n(d.observaciones) },
+    ];
+  }
+
+  const html = campos.map(c => {
+    const tiene = c.val != null;
+    const esOk  = tiene && !["⚠", "✗"].includes(c.val);
+    const cls   = tiene ? (esOk ? "ok" : "warn") : "miss";
+    const valHtml = tiene
+      ? `<div class="field-value">${c.val}</div>`
+      : `<div class="field-value empty">No detectado</div>`;
+    return `
+      <div class="field-row ${cls}">
+        <div class="field-icon">${c.icon}</div>
+        <div style="flex:1">
+          <div class="field-label">${c.label}</div>
+          ${valHtml}
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  document.getElementById("field-list").innerHTML = html;
+  document.getElementById("error-submit").style.display = "none";
+}
+
+// ─────────────────────────────────────────────
+// Envío a Google Sheets
+// ─────────────────────────────────────────────
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxvMv8Z9xIwttMDkZkwDQWx080SIjFp1vcPluywMvzoaTe2Qiayx0SYd2XVGY3L7-_9/exec";
+
+function enviarDatos() {
+  const btn = document.getElementById("btn-submit");
+  btn.disabled = true;
+  btn.textContent = "Guardando...";
+
+  const payload = { tipo: estado.tipo, datos: estado.datos };
+
+  fetch(APPS_SCRIPT_URL, {
+    method: "POST",
+    mode: "no-cors",
+    headers: { "Content-Type": "text/plain" },
+    body: JSON.stringify(payload),
+  })
+  .then(() => {
+    const tipo  = estado.tipo === "riego" ? "Riego del día" : "Mantenimiento semanal";
+    const ahora = new Date().toLocaleString("es-CO", { dateStyle: "short", timeStyle: "short" });
+    document.getElementById("exito-detalle").textContent = tipo + "\n" + ahora;
+    ir("s-exito");
+  })
+  .catch(() => {
+    document.getElementById("error-submit").style.display = "block";
+    btn.disabled = false;
+    btn.textContent = "Guardar ✓";
+  });
+}
+
+// ─────────────────────────────────────────────
+// Reiniciar
+// ─────────────────────────────────────────────
+function reiniciar() {
+  estado = { tipo: null, transcript: "", datos: {} };
+  document.getElementById("card-riego").classList.remove("selected");
+  document.getElementById("card-mant").classList.remove("selected");
+  document.getElementById("btn-tipo").disabled = true;
+  ir("s-tipo");
+}
+</script>
+</body>
+</html>
