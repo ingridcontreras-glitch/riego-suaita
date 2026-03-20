@@ -822,7 +822,7 @@ function renderRevision() {
 // ─────────────────────────────────────────────
 // Envío a Google Sheets
 // ─────────────────────────────────────────────
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxvMv8Z9xIwttMDkZkwDQWx080SIjFp1vcPluywMvzoaTe2Qiayx0SYd2XVGY3L7-_9/exec";
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxpPNJ7tjPYBkpPBIP0aC2gG15d8nPxvriEl2ZHTUkThE4yc7UFDqVitQcRBIIlAeL0/exec";
 
 function enviarDatos() {
   const btn = document.getElementById("btn-submit");
@@ -830,26 +830,21 @@ function enviarDatos() {
   btn.textContent = "Guardando...";
 
   const payload = { tipo: estado.tipo, datos: estado.datos };
+  const url = APPS_SCRIPT_URL + "?data=" + encodeURIComponent(JSON.stringify(payload));
 
-  fetch(APPS_SCRIPT_URL, {
-    method: "POST",
-    mode: "no-cors",
-    headers: { "Content-Type": "text/plain" },
-    body: JSON.stringify(payload),
-  })
-  .then(() => {
-    const tipo  = estado.tipo === "riego" ? "Riego del día" : "Mantenimiento semanal";
-    const ahora = new Date().toLocaleString("es-CO", { dateStyle: "short", timeStyle: "short" });
-    document.getElementById("exito-detalle").textContent = tipo + "\n" + ahora;
-    ir("s-exito");
-  })
-  .catch(() => {
-    document.getElementById("error-submit").style.display = "block";
-    btn.disabled = false;
-    btn.textContent = "Guardar ✓";
-  });
+  fetch(url, { method: "GET", mode: "no-cors" })
+    .then(() => {
+      const tipo  = estado.tipo === "riego" ? "Riego del día" : "Mantenimiento semanal";
+      const ahora = new Date().toLocaleString("es-CO", { dateStyle: "short", timeStyle: "short" });
+      document.getElementById("exito-detalle").textContent = tipo + "\n" + ahora;
+      ir("s-exito");
+    })
+    .catch(() => {
+      document.getElementById("error-submit").style.display = "block";
+      btn.disabled = false;
+      btn.textContent = "Guardar ✓";
+    });
 }
-
 // ─────────────────────────────────────────────
 // Reiniciar
 // ─────────────────────────────────────────────
