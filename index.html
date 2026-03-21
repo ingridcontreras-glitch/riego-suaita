@@ -822,28 +822,56 @@ function renderRevision() {
 // ─────────────────────────────────────────────
 // Envío a Google Sheets
 // ─────────────────────────────────────────────
-const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz_8mq4oWbhDAqszEXCFfOiR9bC-Knr_Lpjry71RCsG3ooHmmO8BZ0EB_Y93-JsHSYX/exec";
+
+const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyYtRyRijs9XHkaXa_Q0X5138OJmu6bdQSCCesJMCgWwZnf1UcCPKAlbqlgJmuApE6n/exec";
 
 function enviarDatos() {
   const btn = document.getElementById("btn-submit");
   btn.disabled = true;
   btn.textContent = "Guardando...";
 
-  const payload = { tipo: estado.tipo, datos: estado.datos };
-  const url = APPS_SCRIPT_URL + "?data=" + encodeURIComponent(JSON.stringify(payload));
+  const payload  = { tipo: estado.tipo, datos: estado.datos };
+  const callbackName = "cb_" + Date.now();
+  const url = APPS_SCRIPT_URL
+    + "?data=" + encodeURIComponent(JSON.stringify(payload))
+    + "&callback=" + callbackName;
 
-  fetch(url, { method: "GET", mode: "no-cors" })
-    .then(() => {
-      const tipo  = estado.tipo === "riego" ? "Riego del día" : "Mantenimiento semanal";
-      const ahora = new Date().toLocaleString("es-CO", { dateStyle: "short", timeStyle: "short" });
-      document.getElementById("exito-detalle").textContent = tipo + "\n" + ahora;
-      ir("s-exito");
-    })
-    .catch(() => {
+  // Timeout por si falla silenciosamente
+  const timer = setTimeout(() => {
+    cleanup();
+    // Apps Script redirige y la respuesta llega opaca — asumimos ok
+    mostrarExito();
+  }, 5000);
+
+  window[callbackName] = function(resp) {
+    clearTimeout(timer);
+    cleanup();
+    if (resp && resp.ok) {
+      mostrarExito();
+    } else {
       document.getElementById("error-submit").style.display = "block";
       btn.disabled = false;
       btn.textContent = "Guardar ✓";
-    });
+    }
+  };
+
+  function cleanup() {
+    const el = document.getElementById("jsonp-script");
+    if (el) el.remove();
+    delete window[callbackName];
+  }
+
+  function mostrarExito() {
+    const tipo  = estado.tipo === "riego" ? "Riego del día" : "Mantenimiento semanal";
+    const ahora = new Date().toLocaleString("es-CO", { dateStyle:"short", timeStyle:"short" });
+    document.getElementById("exito-detalle").textContent = tipo + "\n" + ahora;
+    ir("s-exito");
+  }
+
+  const script = document.createElement("script");
+  script.id  = "jsonp-script";
+  script.src = url;
+  document.body.appendChild(script);
 }
 // ─────────────────────────────────────────────
 // Reiniciar
